@@ -18,13 +18,15 @@ Describe 'ResidueSweep project contracts' {
     }
 
     It 'translates every static user-facing XAML value' {
-        [xml]$xaml = Get-Content -LiteralPath (Join-Path $script:RepoRoot 'Schemas\MainWindow.xaml') -Raw
         $attributes = @('AutomationProperties.Name', 'Content', 'Header', 'Text', 'Title', 'ToolTip')
-        $missing = foreach ($node in $xaml.SelectNodes('//*')) {
-            foreach ($attribute in @($node.Attributes)) {
-                $value = [string]$attribute.Value
-                if ($attributes -notcontains $attribute.LocalName -or $value -notmatch '[A-Za-z]' -or $value -match '^\{|^ResidueSweep$') { continue }
-                if (-not $script:Locale.Strings.PSObject.Properties[$value]) { $value }
+        $missing = foreach ($schema in @('MainWindow.xaml', 'KeepListWindow.xaml')) {
+            [xml]$xaml = Get-Content -LiteralPath (Join-Path $script:RepoRoot "Schemas\$schema") -Raw
+            foreach ($node in $xaml.SelectNodes('//*')) {
+                foreach ($attribute in @($node.Attributes)) {
+                    $value = [string]$attribute.Value
+                    if ($attributes -notcontains $attribute.LocalName -or $value -notmatch '[A-Za-z]' -or $value -match '^\{|^ResidueSweep$') { continue }
+                    if (-not $script:Locale.Strings.PSObject.Properties[$value]) { $value }
+                }
             }
         }
         $missing | Should -BeNullOrEmpty

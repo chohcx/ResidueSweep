@@ -36,6 +36,7 @@ $script:CleanupCatalogPath = Join-Path $PSScriptRoot 'Config\Cleanup.json'
 $script:CleanupExclusionsPath = Join-Path $PSScriptRoot 'Config\CleanupExclusions.json'
 $script:LocalesPath = Join-Path $PSScriptRoot 'Config\Locales'
 $script:MainWindowSchema = Join-Path $PSScriptRoot 'Schemas\MainWindow.xaml'
+$script:KeepListSchema = Join-Path $PSScriptRoot 'Schemas\KeepListWindow.xaml'
 $script:QuarantineRoot = Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 'ResidueSweep\Quarantine'
 
 . (Join-Path $PSScriptRoot 'Scripts\Localization\Localization.ps1')
@@ -43,6 +44,7 @@ $script:QuarantineRoot = Join-Path ([Environment]::GetFolderPath('LocalApplicati
 . (Join-Path $PSScriptRoot 'Scripts\Cleanup\Cleanup-Actions.ps1')
 . (Join-Path $PSScriptRoot 'Scripts\GUI\Helpers.ps1')
 . (Join-Path $PSScriptRoot 'Scripts\GUI\Theme.ps1')
+. (Join-Path $PSScriptRoot 'Scripts\GUI\KeepList.ps1')
 . (Join-Path $PSScriptRoot 'Scripts\GUI\MainWindow-Cleanup.ps1')
 . (Join-Path $PSScriptRoot 'Scripts\GUI\Show-MainWindow.ps1')
 

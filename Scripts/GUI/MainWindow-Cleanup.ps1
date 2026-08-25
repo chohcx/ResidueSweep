@@ -1,3 +1,57 @@
+function Format-ResidueSweepByteSize {
+    param([long]$Bytes)
+
+    if ($Bytes -ge 1GB) { return '{0:N2} GiB' -f ($Bytes / 1GB) }
+    if ($Bytes -ge 1MB) { return '{0:N2} MiB' -f ($Bytes / 1MB) }
+    if ($Bytes -ge 1KB) { return '{0:N1} KiB' -f ($Bytes / 1KB) }
+    return '{0:N0} B' -f $Bytes
+}
+
+function ConvertTo-ResidueSweepCleanupPreviewGroup {
+    param([object[]]$Report, [hashtable]$NameById)
+
+    $buckets = [Collections.Specialized.OrderedDictionary]::new()
+    foreach ($summary in @($Report)) {
+        $id = [string]$summary.CapabilityId
+        $key = if ($id -eq 'RecycleBin') { "$id|$($summary.Path)" } else { $id }
+        if (-not $buckets.Contains($key)) { $buckets[$key] = [Collections.Generic.List[object]]::new() }
+        $buckets[$key].Add($summary)
+    }
+
+    foreach ($key in $buckets.Keys) {
+        $summaries = @($buckets[$key])
+        $first = $summaries[0]
+        $detailItems = @($summaries | ForEach-Object { @($_.Items) } | ForEach-Object {
+            [PSCustomObject]@{ Path = $_.Path; SizeText = Format-ResidueSweepByteSize -Bytes ([long]$_.SizeBytes) }
+        })
+        if ($detailItems.Count -eq 0) {
+            $detailItems = @($summaries | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_.Path) } | ForEach-Object {
+                [PSCustomObject]@{ Path = $_.Path; SizeText = Format-ResidueSweepByteSize -Bytes ([long]$_.SizeBytes) }
+            })
+        }
+        $fileCount = [long](($summaries | Measure-Object FileCount -Sum).Sum)
+        $sizeBytes = [long](($summaries | Measure-Object SizeBytes -Sum).Sum)
+        $canSelect = ([string]$first.CapabilityId -eq 'RecycleBin')
+        [PSCustomObject]@{
+            CapabilityId   = [string]$first.CapabilityId
+            CapabilityName = [string]$NameById[[string]$first.CapabilityId]
+            IsSelected     = -not $canSelect
+            CanSelect      = $canSelect
+            Path           = $first.Path
+            RawMode        = [string]$first.Mode
+            Mode           = [string]$first.Mode
+            FileCount      = $fileCount
+            CountText      = $null
+            SizeBytes      = $sizeBytes
+            SizeText       = Format-ResidueSweepByteSize -Bytes $sizeBytes
+            DetailItems    = $detailItems
+            Exists         = @($summaries | Where-Object Exists).Count -gt 0
+            SkippedItems   = [long](($summaries | Measure-Object SkippedItems -Sum).Sum)
+            Detail         = $first.Detail
+        }
+    }
+}
+
 function New-ResidueSweepCleanupSessionState {
     [PSCustomObject]@{ LastScanIds = @(); ApprovedPaths = @() }
 }
@@ -34,6 +88,7 @@ function Initialize-ResidueSweepCleanup {
     $restoreButton = $Window.FindName('CleanupRestoreBtn')
     $purgeButton = $Window.FindName('CleanupPurgeBtn')
     $exclusionsButton = $Window.FindName('CleanupExclusionsBtn')
+    $openQuarantineButton = $Window.FindName('CleanupOpenQuarantineBtn')
     $selectAllButton = $Window.FindName('CleanupSelectAllBtn')
     $clearSelectionButton = $Window.FindName('CleanupClearSelectionBtn')
     $selectedCountText = $Window.FindName('CleanupSelectedCountText')
@@ -43,24 +98,22 @@ function Initialize-ResidueSweepCleanup {
     $previewEmptyPanel = $Window.FindName('CleanupPreviewEmptyPanel')
     $previewEmptyText = $Window.FindName('CleanupPreviewEmptyText')
     $catalogById = @{}
+    $nameById = @{}
     $sessionState = New-ResidueSweepCleanupSessionState
     $testScanCurrent = ${function:Test-ResidueSweepCleanupScanCurrent}
     $startFadeIn = ${function:Start-ResidueSweepCleanupFadeIn}
+    $convertPreviewGroups = ${function:ConvertTo-ResidueSweepCleanupPreviewGroup}
+    $showKeepList = ${function:Show-ResidueSweepKeepList}
     $exclusionsPath = $script:CleanupExclusionsPath
+    $keepListSchema = $script:KeepListSchema
 
-    $formatSize = {
-        param([long]$Bytes)
-
-        if ($Bytes -ge 1GB) { return '{0:N2} GiB' -f ($Bytes / 1GB) }
-        if ($Bytes -ge 1MB) { return '{0:N2} MiB' -f ($Bytes / 1MB) }
-        if ($Bytes -ge 1KB) { return '{0:N1} KiB' -f ($Bytes / 1KB) }
-        return '{0:N0} B' -f $Bytes
-    }
+    $formatSize = ${function:Format-ResidueSweepByteSize}
 
     $updateHistoryButtons = {
         $history = @(Get-ResidueSweepQuarantineHistory -QuarantineRoot $QuarantineRoot | Sort-Object CreatedAt -Descending)
         $restoreButton.IsEnabled = $history.Count -gt 0
         $purgeButton.IsEnabled = $history.Count -gt 0
+        $openQuarantineButton.IsEnabled = $history.Count -gt 0
         $historyCountText.Text = '{0:N0}' -f $history.Count
         return $history
     }.GetNewClosure()
@@ -69,10 +122,12 @@ function Initialize-ResidueSweepCleanup {
         $catalog = Get-Content -LiteralPath $CatalogPath -Raw -Encoding UTF8 | ConvertFrom-Json
         $items = @($catalog.Capabilities | ForEach-Object {
             $catalogById[[string]$_.Id] = $_
+            $localizedName = Get-ResidueSweepLocalizedValue -Section Cleanup -Id ([string]$_.Id) -Property Name -Fallback $_.Name
+            $nameById[[string]$_.Id] = $localizedName
             [PSCustomObject]@{
                 Id          = [string]$_.Id
                 Area        = Get-ResidueSweepLocalizedValue -Section Cleanup -Id ([string]$_.Id) -Property Area -Fallback $_.Area
-                Name        = Get-ResidueSweepLocalizedValue -Section Cleanup -Id ([string]$_.Id) -Property Name -Fallback $_.Name
+                Name        = $localizedName
                 Status      = Get-ResidueSweepText -Text ([string]$_.Status)
                 Safety      = Get-ResidueSweepLocalizedValue -Section Cleanup -Id ([string]$_.Id) -Property Safety -Fallback $_.Safety
                 Execution   = Get-ResidueSweepText -Text ([string]$_.Execution)
@@ -156,30 +211,10 @@ function Initialize-ResidueSweepCleanup {
 
         try {
             $report = @(Get-ResidueSweepCleanupDiagnostics -CapabilityId $selectedIds -QuarantineRoot $QuarantineRoot -ExclusionsPath $exclusionsPath)
-            $displayReport = [Collections.Generic.List[object]]::new()
-            $displayLimit = 10000
-            $displayedFiles = 0
-            foreach ($summary in @($report | Sort-Object @{ Expression = { if (@($_.Items).Count -gt 0) { 1 } else { 0 } } })) {
-                $definition = $catalogById[[string]$summary.CapabilityId]
-                $canSelectResult = ([string]$summary.CapabilityId -eq 'RecycleBin')
-                $items = @($summary.Items)
-                if ($items.Count -gt 0) {
-                    foreach ($item in $items) {
-                        if ($displayedFiles -ge $displayLimit) { break }
-                        [void]$displayReport.Add([PSCustomObject]@{
-                            CapabilityId = $summary.CapabilityId; CapabilityName = Get-ResidueSweepLocalizedValue -Section Cleanup -Id ([string]$summary.CapabilityId) -Property Name -Fallback $definition.Name
-                            IsSelected = $true; CanSelect = $false; Path = $item.Path; RawMode = $summary.Mode; Mode = Get-ResidueSweepText -Text ([string]$summary.Mode)
-                            Exists = $true; FileCount = 1; SizeBytes = [long]$item.SizeBytes; SizeMiB = [Math]::Round(([long]$item.SizeBytes) / 1MB, 2); SkippedItems = 0; Detail = $null
-                        })
-                        $displayedFiles++
-                    }
-                    continue
-                }
-                [void]$displayReport.Add([PSCustomObject]@{
-                    CapabilityId = $summary.CapabilityId; CapabilityName = Get-ResidueSweepLocalizedValue -Section Cleanup -Id ([string]$summary.CapabilityId) -Property Name -Fallback $definition.Name
-                    IsSelected = -not $canSelectResult; CanSelect = $canSelectResult; Path = $summary.Path; RawMode = $summary.Mode; Mode = Get-ResidueSweepText -Text ([string]$summary.Mode)
-                    Exists = $summary.Exists; FileCount = $summary.FileCount; SizeBytes = $summary.SizeBytes; SizeMiB = $summary.SizeMiB; SkippedItems = $summary.SkippedItems; Detail = $summary.Detail
-                })
+            $displayReport = @(& $convertPreviewGroups -Report $report -NameById $nameById)
+            foreach ($group in $displayReport) {
+                $group.Mode = Get-ResidueSweepText -Text $group.RawMode
+                $group.CountText = Get-ResidueSweepText -Text '{0:N0} items' -Arguments @($group.FileCount)
             }
             $previewList.ItemsSource = $displayReport
             $sessionState.LastScanIds = @($selectedIds)
@@ -188,13 +223,12 @@ function Initialize-ResidueSweepCleanup {
             $totalFiles = [long](($report | Measure-Object FileCount -Sum).Sum)
             $totalBytes = [long](($report | Measure-Object SizeBytes -Sum).Sum)
             $resultCountText.Text = '{0:N0}' -f $totalFiles
-            $resultSizeText.Text = & $formatSize $totalBytes
+            $resultSizeText.Text = & $formatSize -Bytes $totalBytes
             $previewEmptyPanel.Visibility = if ($displayReport.Count -gt 0) { 'Collapsed' } else { 'Visible' }
             if ($displayReport.Count -eq 0) {
                 $previewEmptyText.Text = Get-ResidueSweepText -Text 'No matching files or records were found.'
             }
             $statusText.Text = Get-ResidueSweepText -Text 'Preview: {0:N0} files or records, {1:N2} MiB. No changes were made.' -Arguments @($totalFiles, ($totalBytes / 1MB))
-            if ($sessionState.ApprovedPaths.Count -gt $displayLimit) { $statusText.Text += ' ' + (Get-ResidueSweepText -Text 'The first {0:N0} file paths are shown; the size estimate includes all scanned files.' -Arguments @($displayLimit)) }
             $runButton.IsEnabled = @($selectedIds | Where-Object { [string]$catalogById[$_].Execution -notin @('Detection only', 'Configuration', 'History') }).Count -gt 0
         }
         catch {
@@ -278,7 +312,14 @@ function Initialize-ResidueSweepCleanup {
     }.GetNewClosure())
 
     $exclusionsButton.Add_Click(({
-        if (-not (Test-Path -LiteralPath $exclusionsPath -PathType Leaf)) { return }
-        Start-Process -FilePath (Join-Path $env:SystemRoot 'System32\notepad.exe') -ArgumentList $exclusionsPath
+        if (& $showKeepList -Owner $Window -Path $exclusionsPath -SchemaPath $keepListSchema) {
+            & $invalidatePreview
+            $statusText.Text = Get-ResidueSweepText -Text 'Keep list saved. Scan again to apply it.'
+        }
+    }.GetNewClosure()))
+    $openQuarantineButton.Add_Click(({
+        if (Test-Path -LiteralPath $QuarantineRoot -PathType Container) {
+            Start-Process -FilePath (Join-Path $env:SystemRoot 'explorer.exe') -ArgumentList ('"{0}"' -f $QuarantineRoot)
+        }
     }.GetNewClosure()))
 }

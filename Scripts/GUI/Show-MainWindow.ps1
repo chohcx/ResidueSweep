@@ -15,21 +15,29 @@ function Show-ResidueSweepWindow {
     $theme = Get-ResidueSweepTheme
     Set-ResidueSweepThemeResources -Window $window -Theme $theme
 
-    $languageButton = $window.FindName('LanguageBtn')
-    $themeButton = $window.FindName('ThemeBtn')
-    $currentLanguage = if ($script:ResidueSweepLanguage -eq 'zh-TW') { Get-ResidueSweepText -Text 'Traditional Chinese' } else { 'English' }
-    $languageButton.Content = Get-ResidueSweepText -Text 'Language: {0}' -Arguments @($currentLanguage)
-    $themeButton.Content = Get-ResidueSweepText -Text 'Theme: {0}' -Arguments @((Get-ResidueSweepText -Text $theme))
-    $nextLanguage = if ($script:ResidueSweepLanguage -eq 'zh-TW') { 'en-US' } else { 'zh-TW' }
-    $nextTheme = if ($theme -eq 'Dark') { 'Light' } else { 'Dark' }
+    $languagePicker = $window.FindName('LanguagePicker')
+    $themePicker = $window.FindName('ThemePicker')
+    $applySettingsButton = $window.FindName('ApplySettingsBtn')
+    $currentLanguage = $script:ResidueSweepLanguage
+    $currentTheme = $theme
+    $setLanguage = ${function:Set-ResidueSweepLanguage}
+    $setTheme = ${function:Set-ResidueSweepTheme}
+    $requestReload = ${function:Request-ResidueSweepReload}
+    $languagePicker.SelectedValue = $currentLanguage
+    $themePicker.SelectedValue = $currentTheme
 
-    $languageButton.Add_Click(({
-        Set-ResidueSweepLanguage -Language $nextLanguage
-        Request-ResidueSweepReload -Window $window
-    }.GetNewClosure()))
-    $themeButton.Add_Click(({
-        Set-ResidueSweepTheme -Theme $nextTheme
-        Request-ResidueSweepReload -Window $window
+    $updateApplyState = {
+        $applySettingsButton.IsEnabled = ([string]$languagePicker.SelectedValue -ne $currentLanguage -or [string]$themePicker.SelectedValue -ne $currentTheme)
+    }.GetNewClosure()
+    $languagePicker.Add_SelectionChanged($updateApplyState)
+    $themePicker.Add_SelectionChanged($updateApplyState)
+    $applySettingsButton.Add_Click(({
+        $selectedLanguage = [string]$languagePicker.SelectedValue
+        $selectedTheme = [string]$themePicker.SelectedValue
+        if ($selectedLanguage -eq $currentLanguage -and $selectedTheme -eq $currentTheme) { return }
+        if ($selectedLanguage -ne $currentLanguage) { & $setLanguage -Language $selectedLanguage }
+        if ($selectedTheme -ne $currentTheme) { & $setTheme -Theme $selectedTheme }
+        & $requestReload -Window $window
     }.GetNewClosure()))
 
     Initialize-ResidueSweepCleanup -Window $window -CatalogPath $script:CleanupCatalogPath -QuarantineRoot $script:QuarantineRoot

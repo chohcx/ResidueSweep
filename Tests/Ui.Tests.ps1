@@ -18,7 +18,7 @@ Describe 'ResidueSweep UI contracts' {
         try { $window = [Windows.Markup.XamlReader]::Load($reader) }
         finally { $reader.Close() }
 
-        foreach ($name in @('LanguageBtn', 'ThemeBtn', 'CleanupCapabilityList', 'CleanupPreviewList', 'CleanupScanBtn', 'CleanupQuarantineBtn', 'CleanupRestoreBtn', 'CleanupPurgeBtn')) {
+        foreach ($name in @('LanguagePicker', 'ThemePicker', 'ApplySettingsBtn', 'CleanupCapabilityList', 'CleanupPreviewList', 'CleanupScanBtn', 'CleanupQuarantineBtn', 'CleanupOpenQuarantineBtn', 'CleanupRestoreBtn', 'CleanupPurgeBtn')) {
             $window.FindName($name) | Should -Not -BeNullOrEmpty
         }
         $window.Title | Should -Be 'ResidueSweep'
@@ -45,14 +45,25 @@ Describe 'ResidueSweep UI contracts' {
         $window.WasClosed | Should -BeTrue
     }
 
-    It 'wires direct language and theme clicks into the reload loop' {
+    It 'stages language and theme choices before applying them together' {
         $showScript = Get-Content -LiteralPath (Join-Path $script:RepoRoot 'Scripts\GUI\Show-MainWindow.ps1') -Raw
         $entryScript = Get-Content -LiteralPath (Join-Path $script:RepoRoot 'ResidueSweep.ps1') -Raw
 
-        $showScript | Should -Match '\$languageButton\.Add_Click'
-        $showScript | Should -Match '\$themeButton\.Add_Click'
-        $showScript | Should -Match 'Request-ResidueSweepReload -Window \$window'
+        $showScript | Should -Match '\$applySettingsButton\.Add_Click'
+        $showScript | Should -Match '\$languagePicker\.SelectedValue'
+        $showScript | Should -Match '\$themePicker\.SelectedValue'
+        $showScript | Should -Not -Match '\$languageButton\.Add_Click|\$themeButton\.Add_Click'
+        $showScript | Should -Match '& \$requestReload -Window \$window'
         $entryScript | Should -Match 'while \(\$script:ResidueSweepReloadRequested\)'
+    }
+
+    It 'keeps the page compact without redundant heading descriptions' {
+        $xaml = Get-Content -LiteralPath (Join-Path $script:RepoRoot 'Schemas\MainWindow.xaml') -Raw
+
+        $xaml | Should -Not -Match '<TextBlock Text="ResidueSweep"'
+        $xaml | Should -Not -Match 'Find hidden Windows caches and residual files'
+        $xaml | Should -Not -Match 'Nothing changes until you scan, review, and confirm'
+        $xaml | Should -Not -Match 'Only paths shown by the latest scan can be cleaned'
     }
 
     It 'enables crisp DPI rendering before opening the WPF window' {
@@ -71,5 +82,24 @@ Describe 'ResidueSweep UI contracts' {
         $xaml | Should -Match 'x:Key="CleanupScrollThumb"'
         $xaml | Should -Match 'CornerRadius="4"'
         $xaml | Should -Not -Match '<TextBlock Text="1"'
+    }
+
+    It 'provides visual keep-list controls instead of asking for JSON edits' {
+        $xaml = Get-Content -LiteralPath (Join-Path $script:RepoRoot 'Schemas\KeepListWindow.xaml') -Raw
+
+        $xaml | Should -Match 'x:Name="AddFolderBtn"'
+        $xaml | Should -Match 'x:Name="AddFileBtn"'
+        $xaml | Should -Match 'x:Name="RemoveBtn"'
+        $xaml | Should -Not -Match 'TextBox|JSON'
+    }
+
+    It 'keeps explicit typography styles readable in dark mode' {
+        $xaml = Get-ResidueSweepLocalizedXaml -Path (Join-Path $script:RepoRoot 'Schemas\MainWindow.xaml')
+        $reader = [Xml.XmlReader]::Create([IO.StringReader]::new($xaml))
+        try { $window = [Windows.Markup.XamlReader]::Load($reader) } finally { $reader.Close() }
+        Set-ResidueSweepThemeResources -Window $window -Theme Dark
+
+        $window.FindName('CleanupSelectedCountText').Foreground.Color.ToString() | Should -Be '#FFFFFFFF'
+        $window.Close()
     }
 }
