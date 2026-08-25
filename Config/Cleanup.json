@@ -1,0 +1,29 @@
+{
+  "Version": "1.3",
+  "Capabilities": [
+    { "Id": "UserTemp", "Area": "Temporary files", "Name": "User TEMP", "Status": "Available", "Safety": "Quarantine", "Execution": "Quarantine", "RequiresAdmin": false, "SelectedByDefault": true },
+    { "Id": "WindowsTemp", "Area": "Temporary files", "Name": "Windows Temp", "Status": "Available", "Safety": "Quarantine", "Execution": "Quarantine", "RequiresAdmin": true, "SelectedByDefault": true },
+    { "Id": "WindowsUpdateCache", "Area": "Windows", "Name": "Windows Update download cache", "Status": "Available", "Safety": "Service-aware", "Execution": "Quarantine", "RequiresAdmin": true },
+    { "Id": "DeliveryOptimizationCache", "Area": "Windows", "Name": "Delivery Optimization cache", "Status": "Available", "Safety": "Windows API", "Execution": "Native action", "RequiresAdmin": true },
+    { "Id": "DirectXShaderCache", "Area": "Graphics", "Name": "DirectX shader cache", "Status": "Available", "Safety": "Rebuildable", "Execution": "Quarantine", "RequiresAdmin": false },
+    { "Id": "NVIDIAShaderCache", "Area": "Graphics", "Name": "NVIDIA shader caches (DXCache, GLCache and NV_Cache)", "Status": "Available", "Safety": "Rebuildable", "Execution": "Quarantine", "RequiresAdmin": false, "SelectedByDefault": false },
+    { "Id": "ShellCaches", "Area": "Explorer", "Name": "Thumbnail and icon cache rebuild", "Status": "Available", "Safety": "Explorer restart", "Execution": "Quarantine", "RequiresAdmin": false },
+    { "Id": "RecentItems", "Area": "Privacy", "Name": "Recent Items and Jump Lists", "Status": "Available", "Safety": "Preview", "Execution": "Quarantine", "RequiresAdmin": false },
+    { "Id": "CrashReports", "Area": "Diagnostics", "Name": "Crash dumps, WER and minidumps", "Status": "Available", "Safety": "Quarantine", "Execution": "Quarantine", "RequiresAdmin": true },
+    { "Id": "InstallerOrphans", "Area": "Windows", "Name": "Windows Installer orphan detection", "Status": "Detection only", "Safety": "Detection only", "Execution": "Detection only", "RequiresAdmin": true },
+    { "Id": "BrowserCaches", "Area": "Applications", "Name": "Browser cache, GPU cache, code cache and service workers", "Status": "Available", "Safety": "Profile-aware", "Execution": "Quarantine", "RequiresAdmin": false },
+    { "Id": "DevelopmentCaches", "Area": "Development", "Name": "NuGet, npm, pip and Yarn download caches", "Status": "Available", "Safety": "Rebuildable", "Execution": "Quarantine", "RequiresAdmin": false },
+    { "Id": "DiagnosticLogs", "Area": "Diagnostics", "Name": "Old Windows, feedback, setup and sync logs", "Status": "Available", "Safety": "Age restricted", "Execution": "Quarantine", "RequiresAdmin": true },
+    { "Id": "DownloadedInstallers", "Area": "Storage", "Name": "Downloaded installers and archives", "Status": "Detection only", "Safety": "Review only", "Execution": "Detection only", "RequiresAdmin": false },
+    { "Id": "RecoveryFragments", "Area": "Storage", "Name": "Recovered CHKDSK fragments", "Status": "Detection only", "Safety": "Review only", "Execution": "Detection only", "RequiresAdmin": true },
+    { "Id": "StoreCache", "Area": "Applications", "Name": "Microsoft Store cache", "Status": "Available", "Safety": "Windows reset", "Execution": "Native action", "RequiresAdmin": false },
+    { "Id": "NetworkAndSessionCaches", "Area": "System", "Name": "DNS, ARP, font and clipboard caches", "Status": "Available", "Safety": "Explicit action", "Execution": "Mixed", "RequiresAdmin": true },
+    { "Id": "RecycleBin", "Area": "Storage", "Name": "Multi-drive Recycle Bin", "Status": "Available", "Safety": "Per-drive preview", "Execution": "Irreversible", "RequiresAdmin": false },
+    { "Id": "DriverPackages", "Area": "Drivers", "Name": "Old driver package inventory", "Status": "Detection only", "Safety": "Review only", "Execution": "Detection only", "RequiresAdmin": true },
+    { "Id": "WindowsUpgradeFiles", "Area": "Windows", "Name": "Old Windows installations and upgrade residue", "Status": "Available", "Safety": "Windows servicing", "Execution": "Native action", "RequiresAdmin": true },
+    { "Id": "UninstallResidue", "Area": "Applications", "Name": "Post-uninstall folders, services, tasks and startup entries", "Status": "Detection only", "Safety": "Evidence required", "Execution": "Detection only", "RequiresAdmin": true },
+    { "Id": "CleanupSafety", "Area": "Safety", "Name": "Estimation, item preview, exclusions and allowlists", "Status": "Available", "Safety": "Core", "Execution": "Configuration", "RequiresAdmin": false },
+    { "Id": "QuarantineAndUndo", "Area": "Safety", "Name": "Recoverable quarantine, history and undo", "Status": "Available", "Safety": "Core", "Execution": "History", "RequiresAdmin": false },
+    { "Id": "MemoryTools", "Area": "Memory", "Name": "RAMMap-style memory diagnostics and safe release", "Status": "Available", "Safety": "Diagnostics first", "Execution": "Optional RAMMap", "RequiresAdmin": true }
+  ]
+}

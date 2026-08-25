@@ -1,0 +1,219 @@
+{
+  "Strings": {
+    "Close": "關閉",
+    "Language": "語言",
+    "Traditional Chinese": "繁體中文",
+    "English": "English",
+    "Theme": "主題",
+    "Light": "亮色",
+    "Dark": "暗色",
+    "Language: {0}": "語言：{0}",
+    "Theme: {0}": "主題：{0}",
+    "Cleanup": "系統清理",
+    "Name": "名稱",
+    "Selected": "已選取",
+    "Scan results": "掃描結果",
+    "Estimated space": "預估空間",
+    "Quarantine history": "隔離紀錄",
+    "Choose cleanup areas": "選擇清理範圍",
+    "Cleanup areas": "清理範圍",
+    "Nothing changes until you scan, review, and confirm.": "完成掃描、檢查並確認前，不會變更任何內容。",
+    "Select all": "全部選取",
+    "Clear": "清除",
+    "Review scan results": "檢查掃描結果",
+    "Only paths shown by the latest scan can be cleaned.": "只有最新掃描所顯示的路徑可執行清理。",
+    "Run a scan to see files, records, and estimated space.": "執行掃描以查看檔案、記錄與預估空間。",
+    "Review and clean": "檢查並清理",
+    "Choose cleanup areas, scan, review, then clean.": "選擇清理範圍，掃描並檢查後再執行清理。",
+    "Delete latest quarantine": "刪除最近隔離區",
+    "Scan": "掃描",
+    "Capability": "功能",
+    "Area": "類別",
+    "Status": "狀態",
+    "Safety": "安全方式",
+    "Exists": "存在",
+    "Files": "檔案數",
+    "Skipped": "略過",
+    "Back": "上一步",
+    "Confirm": "確認",
+    "OK": "確定",
+    "Message": "訊息",
+    "Disable": "停用",
+    "Enable": "啟用",
+    "Yes": "是",
+    "No": "否",
+    "Error": "錯誤",
+    "Available": "可使用",
+    "Detection only": "僅偵測",
+    "Execution": "執行方式",
+    "Quarantine": "隔離",
+    "Irreversible": "不可復原",
+    "Configuration": "設定",
+    "History": "歷程記錄",
+    "Diagnostics": "診斷",
+    "Exclusions": "排除規則",
+    "Undo latest": "撤銷最近一次",
+    "Scan selected": "掃描選取項目",
+    "Mode": "模式",
+    "{0} cleanup capabilities and {1} detection-only checks are available. Select targets, scan, review, then run.": "目前提供 {0} 項清理功能與 {1} 項僅偵測檢查。請選取目標、掃描、檢查後再執行。",
+    "Nothing Selected": "尚未選取項目",
+    "Select at least one cleanup capability to scan.": "請至少選取一項要掃描的清理功能。",
+    "Scanning selected cleanup targets. Nothing is being changed...": "正在掃描選取的清理目標，不會進行任何變更…",
+    "Scanning selected cleanup targets...": "正在掃描選取的清理目標…",
+    "Selection changed. Scan again to refresh the preview.": "選取項目已變更，請重新掃描以更新預覽。",
+    "Choose one or more cleanup areas to begin.": "請先選擇一個或多個清理範圍。",
+    "No matching files or records were found.": "找不到符合條件的檔案或記錄。",
+    "The scan could not be completed.": "無法完成掃描。",
+    "Preview: {0:N0} files or records, {1:N2} MiB. No changes were made.": "預覽：{0:N0} 個檔案或記錄，共 {1:N2} MiB。尚未進行任何變更。",
+    "The first {0:N0} file paths are shown; the size estimate includes all scanned files.": "僅顯示前 {0:N0} 個檔案路徑；空間估算仍包含所有已掃描檔案。",
+    "Scan Required": "需要重新掃描",
+    "The selection changed. Scan the selected capabilities again before running cleanup.": "選取項目已變更；執行清理前請重新掃描。",
+    "Warning: Recycle Bin cleanup is permanent and cannot be undone.": "警告：清空資源回收筒是永久操作，無法撤銷。",
+    "Recycle Bin Drive Required": "必須選取資源回收筒磁碟機",
+    "Select at least one Recycle Bin drive in the preview list before running cleanup.": "執行清理前，請在預覽清單中至少選取一個資源回收筒磁碟機。",
+    "Run Selected Cleanup?": "執行選取的清理功能？",
+    "Running selected cleanup actions...": "正在執行選取的清理操作…",
+    "Completed {0:N0} items or actions ({1:N2} MiB); {2:N0} failed or remained locked.": "已完成 {0:N0} 個項目或操作（{1:N2} MiB）；{2:N0} 個失敗或仍在使用中。",
+    "Undo Latest Cleanup?": "撤銷最近一次清理？",
+    "Restore {0:N0} quarantined files from {1}?": "要還原 {1} 隔離的 {0:N0} 個檔案嗎？",
+    "Restored {0:N0} files; {1:N0} conflicts or failures were left untouched.": "已還原 {0:N0} 個檔案；{1:N0} 個衝突或失敗項目維持原狀。",
+    "Undo Failed": "撤銷失敗",
+    "Permanently Delete Latest Quarantine?": "永久刪除最近的隔離內容？",
+    "This permanently deletes {0:N0} quarantined files ({1:N2} MiB). This cannot be undone.": "這會永久刪除 {0:N0} 個隔離檔案（{1:N2} MiB），且無法撤銷。",
+    "Latest quarantine was permanently deleted.": "已永久刪除最近的隔離內容。",
+    "Purge Failed": "清除隔離區失敗",
+    "Unable to load the cleanup catalog: {0}": "無法載入清理目錄：{0}",
+    "Scan failed: {0}": "掃描失敗：{0}",
+    "Cleanup Scan Failed": "清理掃描失敗",
+    "Cleanup Complete": "清理完成",
+    "Cleanup Failed": "清理失敗",
+    "Cleanup failed: {0}": "清理失敗：{0}",
+    "Grid": "格線",
+    "List": "清單",
+    "MessageBox": "訊息",
+    "Find hidden Windows caches and residual files, review every result, then clean safely.": "找出 Windows 中隱藏的快取與殘餘檔案，逐項檢查後再安全清理。",
+    "ResidueSweep will quarantine recoverable files and run the selected Windows-native actions. Close browsers first. Locked files are skipped.": "ResidueSweep 會隔離可恢復的檔案，並執行已選取的 Windows 原生清理操作。請先關閉瀏覽器；鎖定中的檔案會被跳過。"
+  },
+  "Cleanup": {
+    "UserTemp": {
+      "Area": "暫存檔案",
+      "Name": "使用者 TEMP",
+      "Safety": "隔離"
+    },
+    "WindowsTemp": {
+      "Area": "暫存檔案",
+      "Name": "Windows Temp",
+      "Safety": "隔離"
+    },
+    "WindowsUpdateCache": {
+      "Area": "Windows",
+      "Name": "Windows Update 下載快取",
+      "Safety": "服務感知"
+    },
+    "DeliveryOptimizationCache": {
+      "Area": "Windows",
+      "Name": "傳遞最佳化快取",
+      "Safety": "Windows API"
+    },
+    "DirectXShaderCache": {
+      "Area": "圖形",
+      "Name": "DirectX 著色器快取",
+      "Safety": "可重建"
+    },
+    "NVIDIAShaderCache": {
+      "Area": "圖形",
+      "Name": "NVIDIA 著色器快取（DXCache、GLCache 與 NV_Cache）",
+      "Safety": "可重建"
+    },
+    "ShellCaches": {
+      "Area": "檔案總管",
+      "Name": "重建縮圖與圖示快取",
+      "Safety": "重新啟動檔案總管"
+    },
+    "RecentItems": {
+      "Area": "隱私權",
+      "Name": "最近使用的項目與跳躍清單",
+      "Safety": "預覽"
+    },
+    "CrashReports": {
+      "Area": "診斷",
+      "Name": "損毀傾印、WER 與小型傾印",
+      "Safety": "隔離"
+    },
+    "InstallerOrphans": {
+      "Area": "Windows",
+      "Name": "Windows Installer 孤立項目偵測",
+      "Safety": "僅偵測"
+    },
+    "BrowserCaches": {
+      "Area": "應用程式",
+      "Name": "瀏覽器、GPU、程式碼與 Service Worker 快取",
+      "Safety": "設定檔感知"
+    },
+    "DevelopmentCaches": {
+      "Area": "開發工具",
+      "Name": "NuGet、npm、pip 與 Yarn 下載快取",
+      "Safety": "可重建"
+    },
+    "DiagnosticLogs": {
+      "Area": "診斷",
+      "Name": "舊 Windows、意見反應、安裝與同步記錄",
+      "Safety": "依檔齡限制"
+    },
+    "DownloadedInstallers": {
+      "Area": "儲存空間",
+      "Name": "已下載的安裝程式與封存檔",
+      "Safety": "僅供檢查"
+    },
+    "RecoveryFragments": {
+      "Area": "儲存空間",
+      "Name": "CHKDSK 復原檔案片段",
+      "Safety": "僅供檢查"
+    },
+    "StoreCache": {
+      "Area": "應用程式",
+      "Name": "Microsoft Store 快取",
+      "Safety": "Windows 重設"
+    },
+    "NetworkAndSessionCaches": {
+      "Area": "系統",
+      "Name": "DNS、ARP、字型與剪貼簿快取",
+      "Safety": "明確操作"
+    },
+    "RecycleBin": {
+      "Area": "儲存空間",
+      "Name": "多磁碟資源回收筒",
+      "Safety": "逐磁碟預覽"
+    },
+    "DriverPackages": {
+      "Area": "驅動程式",
+      "Name": "舊驅動程式套件清冊",
+      "Safety": "僅供檢查"
+    },
+    "WindowsUpgradeFiles": {
+      "Area": "Windows",
+      "Name": "舊 Windows 安裝與升級殘留",
+      "Safety": "Windows 維護"
+    },
+    "UninstallResidue": {
+      "Area": "應用程式",
+      "Name": "解除安裝後的資料夾、服務、工作與啟動項",
+      "Safety": "需要證據"
+    },
+    "CleanupSafety": {
+      "Area": "安全",
+      "Name": "空間估算、逐項預覽、排除與允許清單",
+      "Safety": "核心"
+    },
+    "QuarantineAndUndo": {
+      "Area": "安全",
+      "Name": "可還原隔離、歷程與復原",
+      "Safety": "核心"
+    },
+    "MemoryTools": {
+      "Area": "記憶體",
+      "Name": "RAMMap 式記憶體診斷與安全釋放",
+      "Safety": "以診斷為優先"
+    }
+  }
+}
