@@ -54,4 +54,22 @@ Describe 'ResidueSweep UI contracts' {
         $showScript | Should -Match 'Request-ResidueSweepReload -Window \$window'
         $entryScript | Should -Match 'while \(\$script:ResidueSweepReloadRequested\)'
     }
+
+    It 'enables crisp DPI rendering before opening the WPF window' {
+        $entryScript = Get-Content -LiteralPath (Join-Path $script:RepoRoot 'ResidueSweep.ps1') -Raw
+        [xml]$xaml = Get-Content -LiteralPath (Join-Path $script:RepoRoot 'Schemas\MainWindow.xaml') -Raw
+
+        $entryScript | Should -Match 'SetProcessDpiAwarenessContext'
+        $xaml.Window.UseLayoutRounding | Should -Be 'True'
+        $xaml.Window.SnapsToDevicePixels | Should -Be 'True'
+        $xaml.Window.'TextOptions.TextFormattingMode' | Should -Be 'Display'
+    }
+
+    It 'uses a themed modern scrollbar without the numbered empty-state badge' {
+        $xaml = Get-Content -LiteralPath (Join-Path $script:RepoRoot 'Schemas\MainWindow.xaml') -Raw
+
+        $xaml | Should -Match 'x:Key="CleanupScrollThumb"'
+        $xaml | Should -Match 'CornerRadius="4"'
+        $xaml | Should -Not -Match '<TextBlock Text="1"'
+    }
 }

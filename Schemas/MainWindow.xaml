@@ -1,7 +1,9 @@
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="ResidueSweep" Width="1280" Height="780" MinWidth="980" MinHeight="650"
-        WindowStartupLocation="CenterScreen" Background="{DynamicResource AppBg}" Opacity="0">
+        WindowStartupLocation="CenterScreen" Background="{DynamicResource AppBg}" Opacity="0"
+        UseLayoutRounding="True" SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType">
     <Window.Triggers>
         <EventTrigger RoutedEvent="FrameworkElement.Loaded">
             <BeginStoryboard>
@@ -102,6 +104,39 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="CleanupScrollThumb" TargetType="{x:Type Thumb}">
+            <Setter Property="Background" Value="{DynamicResource Border}"/>
+            <Setter Property="MinHeight" Value="28"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Thumb}">
+                        <Border x:Name="ThumbVisual" Background="{TemplateBinding Background}" CornerRadius="4" Margin="2,1"/>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="ThumbVisual" Property="Background" Value="{DynamicResource MutedFg}"/></Trigger>
+                            <Trigger Property="IsDragging" Value="True"><Setter TargetName="ThumbVisual" Property="Background" Value="{DynamicResource Accent}"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="{x:Type ScrollBar}">
+            <Setter Property="Width" Value="10"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ScrollBar}">
+                        <Grid Background="{TemplateBinding Background}">
+                            <Track x:Name="PART_Track" IsDirectionReversed="True" Focusable="False">
+                                <Track.DecreaseRepeatButton><RepeatButton Command="{x:Static ScrollBar.PageUpCommand}" Focusable="False" Opacity="0"/></Track.DecreaseRepeatButton>
+                                <Track.Thumb><Thumb Style="{StaticResource CleanupScrollThumb}"/></Track.Thumb>
+                                <Track.IncreaseRepeatButton><RepeatButton Command="{x:Static ScrollBar.PageDownCommand}" Focusable="False" Opacity="0"/></Track.IncreaseRepeatButton>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <Grid Margin="22">
@@ -178,8 +213,7 @@
                             </ListBox.ItemTemplate>
                         </ListBox>
                         <StackPanel x:Name="CleanupPreviewEmptyPanel" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="30">
-                            <TextBlock Text="1" Background="{DynamicResource Accent}" Foreground="White" FontSize="20" Width="42" Height="42" TextAlignment="Center" Padding="0,7"/>
-                            <TextBlock Text="Choose cleanup areas" FontWeight="SemiBold" FontSize="16" HorizontalAlignment="Center" Margin="0,12,0,4"/>
+                            <TextBlock Text="Choose cleanup areas" FontWeight="SemiBold" FontSize="16" HorizontalAlignment="Center" Margin="0,0,0,4"/>
                             <TextBlock x:Name="CleanupPreviewEmptyText" Text="Run a scan to see files, records, and estimated space." Foreground="{DynamicResource MutedFg}" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="430"/>
                         </StackPanel>
                     </Grid>

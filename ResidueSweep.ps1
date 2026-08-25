@@ -17,6 +17,20 @@ if (-not $isAdmin) {
     exit 0
 }
 
+if (-not ('ResidueSweepDpi' -as [type])) {
+    Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+
+public static class ResidueSweepDpi
+{
+    [DllImport("user32.dll")]
+    public static extern bool SetProcessDpiAwarenessContext(IntPtr dpiContext);
+}
+'@
+}
+[void][ResidueSweepDpi]::SetProcessDpiAwarenessContext([IntPtr]::new(-4))
+
 $script:Root = $PSScriptRoot
 $script:CleanupCatalogPath = Join-Path $PSScriptRoot 'Config\Cleanup.json'
 $script:CleanupExclusionsPath = Join-Path $PSScriptRoot 'Config\CleanupExclusions.json'
