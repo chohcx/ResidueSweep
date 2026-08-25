@@ -8,7 +8,7 @@ jobs:
   pester:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install Pester
         shell: pwsh
         run: Install-Module Pester -MinimumVersion 5.7.0 -Force -Scope CurrentUser
