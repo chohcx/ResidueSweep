@@ -1,3 +1,24 @@
+function New-ResidueSweepCleanupSessionState {
+    [PSCustomObject]@{ LastScanIds = @(); ApprovedPaths = @() }
+}
+
+function Test-ResidueSweepCleanupScanCurrent {
+    param([Parameter(Mandatory)]$State, [string[]]$SelectedId)
+
+    $scanned = @($State.LastScanIds | Sort-Object -Unique)
+    $selected = @($SelectedId | Sort-Object -Unique)
+    return $scanned.Count -gt 0 -and ($scanned -join '|') -eq ($selected -join '|')
+}
+
+function Start-ResidueSweepCleanupFadeIn {
+    param([Parameter(Mandatory)][System.Windows.UIElement]$Element)
+
+    $animation = [System.Windows.Media.Animation.DoubleAnimation]::new(0, 1, [TimeSpan]::FromMilliseconds(180))
+    $animation.EasingFunction = [System.Windows.Media.Animation.QuadraticEase]::new()
+    $animation.EasingFunction.EasingMode = [System.Windows.Media.Animation.EasingMode]::EaseOut
+    $Element.BeginAnimation([System.Windows.UIElement]::OpacityProperty, $animation)
+}
+
 function Initialize-ResidueSweepCleanup {
     param(
         [System.Windows.Window]$Window,
@@ -22,8 +43,9 @@ function Initialize-ResidueSweepCleanup {
     $previewEmptyPanel = $Window.FindName('CleanupPreviewEmptyPanel')
     $previewEmptyText = $Window.FindName('CleanupPreviewEmptyText')
     $catalogById = @{}
-    $lastScanIds = @()
-    $lastApprovedPaths = @()
+    $sessionState = New-ResidueSweepCleanupSessionState
+    $testScanCurrent = ${function:Test-ResidueSweepCleanupScanCurrent}
+    $startFadeIn = ${function:Start-ResidueSweepCleanupFadeIn}
     $exclusionsPath = $script:CleanupExclusionsPath
 
     $formatSize = {
@@ -59,6 +81,7 @@ function Initialize-ResidueSweepCleanup {
             }
         })
         $capabilityList.ItemsSource = $items
+        & $startFadeIn -Element $capabilityList
         $availableCount = @($catalog.Capabilities | Where-Object Status -eq 'Available').Count
         $detectionCount = @($catalog.Capabilities | Where-Object Status -eq 'Detection only').Count
         $statusText.Text = Get-ResidueSweepText -Text '{0} cleanup capabilities and {1} detection-only checks are available. Select targets, scan, review, then run.' -Arguments @($availableCount, $detectionCount)
@@ -79,6 +102,8 @@ function Initialize-ResidueSweepCleanup {
     }.GetNewClosure()
 
     $invalidatePreview = {
+        $sessionState.LastScanIds = @()
+        $sessionState.ApprovedPaths = @()
         $runButton.IsEnabled = $false
         $previewList.ItemsSource = $null
         $previewEmptyPanel.Visibility = 'Visible'
@@ -157,8 +182,9 @@ function Initialize-ResidueSweepCleanup {
                 })
             }
             $previewList.ItemsSource = $displayReport
-            $lastScanIds = $selectedIds
-            $lastApprovedPaths = @($report | ForEach-Object { @($_.Items) } | ForEach-Object Path)
+            $sessionState.LastScanIds = @($selectedIds)
+            $sessionState.ApprovedPaths = @($report | ForEach-Object { @($_.Items) } | ForEach-Object Path)
+            & $startFadeIn -Element $previewList
             $totalFiles = [long](($report | Measure-Object FileCount -Sum).Sum)
             $totalBytes = [long](($report | Measure-Object SizeBytes -Sum).Sum)
             $resultCountText.Text = '{0:N0}' -f $totalFiles
@@ -168,7 +194,7 @@ function Initialize-ResidueSweepCleanup {
                 $previewEmptyText.Text = Get-ResidueSweepText -Text 'No matching files or records were found.'
             }
             $statusText.Text = Get-ResidueSweepText -Text 'Preview: {0:N0} files or records, {1:N2} MiB. No changes were made.' -Arguments @($totalFiles, ($totalBytes / 1MB))
-            if ($lastApprovedPaths.Count -gt $displayLimit) { $statusText.Text += ' ' + (Get-ResidueSweepText -Text 'The first {0:N0} file paths are shown; the size estimate includes all scanned files.' -Arguments @($displayLimit)) }
+            if ($sessionState.ApprovedPaths.Count -gt $displayLimit) { $statusText.Text += ' ' + (Get-ResidueSweepText -Text 'The first {0:N0} file paths are shown; the size estimate includes all scanned files.' -Arguments @($displayLimit)) }
             $runButton.IsEnabled = @($selectedIds | Where-Object { [string]$catalogById[$_].Execution -notin @('Detection only', 'Configuration', 'History') }).Count -gt 0
         }
         catch {
@@ -183,7 +209,7 @@ function Initialize-ResidueSweepCleanup {
 
     $runButton.Add_Click({
         $selectedIds = @(& $getSelectedIds)
-        if ($selectedIds.Count -eq 0 -or (@($lastScanIds) -join '|') -ne ($selectedIds -join '|')) {
+        if (-not (& $testScanCurrent -State $sessionState -SelectedId $selectedIds)) {
             Show-MessageBox -Owner $Window -Title 'Scan Required' -Message 'The selection changed. Scan the selected capabilities again before running cleanup.' -Button 'OK' -Icon 'Information' | Out-Null
             return
         }
@@ -205,7 +231,7 @@ function Initialize-ResidueSweepCleanup {
         $statusText.Text = Get-ResidueSweepText -Text 'Running selected cleanup actions...'
         Invoke-DoEvents
         try {
-            $results = @(Invoke-ResidueSweepCleanupExecution -CapabilityId $executableIds -QuarantineRoot $QuarantineRoot -ExclusionsPath $exclusionsPath -RecycleDrive $recycleDrives -ApprovedPath $lastApprovedPaths -Confirm:$false)
+            $results = @(Invoke-ResidueSweepCleanupExecution -CapabilityId $executableIds -QuarantineRoot $QuarantineRoot -ExclusionsPath $exclusionsPath -RecycleDrive $recycleDrives -ApprovedPath $sessionState.ApprovedPaths -Confirm:$false)
             $completed = @($results | Where-Object Status -in @('Moved', 'Completed'))
             $failed = @($results | Where-Object Status -eq 'Failed')
             $movedBytes = [long](($completed | Measure-Object SizeBytes -Sum).Sum)
