@@ -100,7 +100,7 @@ function Get-ResidueSweepLocalizedValue {
 function Get-ResidueSweepLocalizedXaml {
     param([Parameter(Mandatory)][string]$Path)
 
-    [xml]$document = Get-Content -LiteralPath $Path -Raw
+    [xml]$document = Get-Content -LiteralPath $Path -Raw -Encoding UTF8
     if (-not $script:ResidueSweepLocale -or -not $script:ResidueSweepLocale.Strings) {
         return $document.OuterXml
     }

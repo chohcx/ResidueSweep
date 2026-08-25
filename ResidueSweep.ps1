@@ -17,6 +17,15 @@ if (-not $isAdmin) {
     exit 0
 }
 
+trap {
+    try {
+        $failureRoot = Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 'ResidueSweep'
+        [IO.Directory]::CreateDirectory($failureRoot) | Out-Null
+        ($_ | Out-String) | Set-Content -LiteralPath (Join-Path $failureRoot 'startup-error.log') -Encoding UTF8
+    } catch {}
+    exit 1
+}
+
 if (-not ('ResidueSweepDpi' -as [type])) {
     Add-Type -TypeDefinition @'
 using System;

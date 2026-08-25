@@ -102,4 +102,25 @@ Describe 'ResidueSweep UI contracts' {
         $window.FindName('CleanupSelectedCountText').Foreground.Color.ToString() | Should -Be '#FFFFFFFF'
         $window.Close()
     }
+
+    It 'loads the UTF-8 localized XAML in Windows PowerShell 5.1' {
+        $probe = @'
+$ErrorActionPreference = 'Stop'
+$root = '__ROOT__'
+$script:LocalesPath = Join-Path $root 'Config\Locales'
+. (Join-Path $root 'Scripts\Localization\Localization.ps1')
+Initialize-ResidueSweepLocalization -Language 'zh-TW' | Out-Null
+Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
+$xaml = Get-ResidueSweepLocalizedXaml -Path (Join-Path $root 'Schemas\MainWindow.xaml')
+$reader = [Xml.XmlReader]::Create([IO.StringReader]::new($xaml))
+try { $window = [Windows.Markup.XamlReader]::Load($reader) } finally { $reader.Close() }
+$window.Close()
+'@
+        $probe = $probe.Replace('__ROOT__', $script:RepoRoot.Replace("'", "''"))
+        $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($probe))
+
+        & powershell.exe -NoLogo -NoProfile -NonInteractive -STA -ExecutionPolicy Bypass -OutputFormat Text -EncodedCommand $encoded 2>$null | Out-Null
+
+        $LASTEXITCODE | Should -Be 0
+    }
 }
